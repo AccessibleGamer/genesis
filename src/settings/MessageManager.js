@@ -4,7 +4,6 @@
  * MessageManager for
  */
 class MessaageManager {
-
   /**
    * Construct a message manager for sending and managing messages
    * @param {Genesis} bot bot containing necessary settings
@@ -14,6 +13,7 @@ class MessaageManager {
     this.logger = bot.logger;
     this.settings = bot.settings;
     this.owner = bot.owner;
+    this.discord = bot.discord;
 
     /**
      * Zero space whitespace character to prepend to any messages sent
@@ -208,12 +208,54 @@ class MessaageManager {
     }
   }
 
-  async webhook(webhookId, embed) {
-    this.bot.client.fetchWebhook(webhookId).sendSlackMessage({
-      username: this.bot.client.user.username,
-      attachments: [embed],
-    })
-    .catch(this.logger.error);
+  async webhook(ctx, { text = '_ _', embed = undefined }) {
+    if (ctx.webhook.id && ctx.webhook.token) {
+      const client = new this.discord.WebhookClient(ctx.webhook.id, ctx.webhook.token);
+      return client.send(text, embed);
+    }
+    if (ctx.channel.permissionsFor(this.client.user.id).has('MANAGE_WEBHOOKS')) {
+      const webhooks = await ctx.channel.fetchWebhooks();
+      let webhook;
+      if (webhooks.array().length > 0) {
+        webhook = webhooks.array()[0];
+      } else {
+        webhook = await ctx.channel.createWebhook(this.client.user.username);
+        this.logger.debug('webhook');
+        this.logger.debug(JSON.stringify(webhook));
+        await this.settings.setChannelSetting('webhookId', String(webhook.id));
+        await this.settings.setChannelSetting('webhookToken', String(webhook.token));
+        await this.settings.setChannelSetting('webhookName', String(webhook.name));
+        await this.settings.setChannelSetting('webhookAvatar', String(webhook.avatar));
+      }
+      // eslint-disable-next-line no-param-reassign
+      ctx.webhook = webhook;
+      return this.webhook(ctx, { text, embed });
+    }
+    if (ctx.message) {
+      if (embed) {
+        return Promise.all(embed.embeds.map(subEmbed =>
+          this.embed(ctx.message, subEmbed, ctx.deleteCall, ctx.deleteResponse)));
+      }
+      return this.reply(ctx.message, text, ctx.deleteCall, ctx.deleteResponse);
+    }
+    return Promise.all(embed.embeds.map(subEmbed =>
+      this.embedToChannel(ctx.chnnel, subEmbed, text, ctx.deleteAfterDuration)));
+  }
+
+  webhookWrapEmbed(embed, ctx) {
+    return {
+      username: ctx.webhook.name || this.client.user.username,
+      avatarURL: ctx.webhook.avatar || this.client.user.avatarURL,
+      embeds: [embed],
+    };
+  }
+
+  webhookWrapEmbeds(embeds) {
+    return {
+      username: this.client.user.username,
+      avatarURL: this.client.user.avatarURL,
+      embeds,
+    };
   }
 }
 
