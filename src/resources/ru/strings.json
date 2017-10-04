@@ -1,12 +1,12 @@
 {
   "languages":{
     "en-US":{
-      "damage_reply":"Operator $author, the damage flowchart, at your request.",
+      "damage_reply":"Оператор $author, повреждение схемы, в вашем запросе.",
       "override_enabled":"Оператор, переопределение теперь включено.",
       "override_disabled":"Оператор, переопределение теперь выключено.",
       "override_toggle_error":"Произошла ошибка переключения `override`.",
       "command_not_blacklistable":"`$command` не может быть внесена в черный список.",
-      "cannot_reply":"Нет ответа на команду, `$command`.",
+      "cannot_reply":"Не могу ответить на команду, `$command`.",
       "command_added_blacklist":"`$command` добавлена в черный список.",
       "all_command_added_blacklist":"Все команды добавлены в черный список",
       "command_removed_blacklist":"`$command` убрана из черного списка.",
