@@ -6,15 +6,15 @@
       "override_disabled":"Operator, the override is now disabled.",
       "override_toggle_error":"An error occurred toggling `override`.",
       "command_not_blacklistable":"`$command` is not able to be blacklisted.",
-      "cannot_reply":"Cannot respond to command, `$command`.",
-      "command_added_blacklist":"`$command` added to the blacklist.",
-      "all_command_added_blacklist":"All commands added to the blacklist",
-      "command_removed_blacklist":"`$command` removed from the blacklist.",
+      "cannot_reply":"Не могу ответить на команду, `$command`.",
+      "command_added_blacklist":"`$command` добавлена в черный список.",
+      "all_command_added_blacklist":"Все команды добавлены в черный список",
+      "command_removed_blacklist":"`$command` убрана из черного списка.",
       "all_command_removed_blacklist":"All commands removed from the blacklist",
       "response_enabled":"Operator, responding to settings changes is now enabled.",
       "response_disabled":"Operator, responding to settings changes is now disabled.",
       "response_toggle_error":"An error occurred toggling `response`.",
-      "language_set":"Lanuage set to `$language`.",
+      "language_set":"Язык изменен на `$language`.",
       "language_not_set":"Language not set to `$language`. Provided language was either invalid or already set."
     }
   }
