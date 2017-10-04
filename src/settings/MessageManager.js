@@ -211,22 +211,29 @@ class MessaageManager {
   async webhook(ctx, { text = '_ _', embed = undefined }) {
     if (ctx.webhook.id && ctx.webhook.token) {
       const client = new this.discord.WebhookClient(ctx.webhook.id, ctx.webhook.token);
-      return client.send(text, embed);
+      try {
+        return client.send(text, embed);
+      } catch (e) {
+        this.logger.error(`Something went wrong sending webhook: ${JSON.stringify(embed)} | ${text}`);
+      }
     }
-    if (ctx.channel.permissionsFor(this.client.user.id).has('MANAGE_WEBHOOKS')) {
+    const channelWebhook = await this.settings.getChannelWebhook(ctx.channel);
+    if (channelWebhook.token && channelWebhook.id) {
+      // eslint-disable-next-line no-param-reassign
+      ctx.webhook = channelWebhook;
+      return this.webhook(ctx, { text, embed });
+    } else if (ctx.channel.permissionsFor(this.client.user.id).has('MANAGE_WEBHOOKS')) {
       const webhooks = await ctx.channel.fetchWebhooks();
       let webhook;
       if (webhooks.array().length > 0) {
         webhook = webhooks.array()[0];
       } else {
         webhook = await ctx.channel.createWebhook(this.client.user.username);
-        this.logger.debug('webhook');
-        this.logger.debug(JSON.stringify(webhook));
-        await this.settings.setChannelSetting('webhookId', String(webhook.id));
-        await this.settings.setChannelSetting('webhookToken', String(webhook.token));
-        await this.settings.setChannelSetting('webhookName', String(webhook.name));
-        await this.settings.setChannelSetting('webhookAvatar', String(webhook.avatar));
       }
+      await this.settings.setChannelSetting(ctx.channel, 'webhookId', String(webhook.id));
+      await this.settings.setChannelSetting(ctx.channel, 'webhookToken', String(webhook.token));
+      await this.settings.setChannelSetting(ctx.channel, 'webhookName', this.client.user.username);
+      await this.settings.setChannelSetting(ctx.channel, 'webhookAvatar', this.client.user.avatarURL.replace('?size=2048', ''));
       // eslint-disable-next-line no-param-reassign
       ctx.webhook = webhook;
       return this.webhook(ctx, { text, embed });
@@ -250,10 +257,10 @@ class MessaageManager {
     };
   }
 
-  webhookWrapEmbeds(embeds) {
+  webhookWrapEmbeds(embeds, ctx) {
     return {
-      username: this.client.user.username,
-      avatarURL: this.client.user.avatarURL,
+      username: ctx.webhook.name || this.client.user.username,
+      avatarURL: ctx.webhook.avatar || this.client.user.avatarURL,
       embeds,
     };
   }

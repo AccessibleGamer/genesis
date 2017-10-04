@@ -188,7 +188,6 @@ class Notifier {
     ctx.deleteAfterDuration = deleteAfter;
     return this.bot.messageManager.webhook(ctx,
       { text: prepend, embed: this.bot.messageManager.webhookWrapEmbed(embed, ctx) });
-    // return this.bot.messageManager.embedToChannel(channel, embed, prepend, deleteAfter);
   }
 
   /**
@@ -282,7 +281,7 @@ class Notifier {
         embed.thumbnail.url = thumb;
       }
     } catch (e) {
-      this.logger.error(`${e.exception.code}: ${e.exception.message}`);
+      // do nothing, it happens
     } finally {
       await this.broadcast(embed, platform, 'invasions', invasion.rewardTypes, 86400000);
     }

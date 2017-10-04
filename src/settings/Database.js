@@ -161,14 +161,29 @@ class Database {
     if (res[0].length === 0) {
       if (channel.type === 'text') {
         await this.addGuildTextChannel(channel);
+        if (!/webhook/.test(setting)) {
+          await this.setChannelSetting(channel, setting, this.defaults[`${setting}`]);
+          return this.defaults[`${setting}`];
+        }
+        return undefined;
+      }
+      await this.addDMChannel(channel);
+      if (!/webhook/.test(setting)) {
         await this.setChannelSetting(channel, setting, this.defaults[`${setting}`]);
         return this.defaults[`${setting}`];
       }
-      await this.addDMChannel(channel);
-      await this.setChannelSetting(channel, setting, this.defaults[`${setting}`]);
-      return this.defaults[`${setting}`];
+      return undefined;
     }
     return res[0][0].val;
+  }
+
+  async getChannelWebhook(channel) {
+    return {
+      avatar: await this.getChannelSetting(channel, 'webhookAvatar') || this.bot.client.user.avatarURL.replace('?size=2048', ''),
+      name: await this.getChannelSetting(channel, 'webhookName') || this.bot.client.user.username,
+      id: await this.getChannelSetting(channel, 'webhookId'),
+      token: await this.getChannelSetting(channel, 'webhookToken'),
+    };
   }
 
   /**
